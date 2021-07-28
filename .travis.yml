@@ -51,6 +51,7 @@ deploy:
   provider: releases
   overwrite: true
   api_key: $GITHUB_TOKEN
+  name: "Firmware ${TRAVIS_TAG}"
   file_glob: true
   file:
     - "./Firmware.zip"
