@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>RaGae.App.Lamp.Domain</AssemblyName>
+    <RootNamespace>RaGae.App.Lamp.Domain</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.IO.Ports" Version="5.0.1" />
+  </ItemGroup>
+
+</Project>

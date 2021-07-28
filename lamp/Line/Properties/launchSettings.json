@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Line": {
+      "commandName": "Project",
+      "commandLineArgs": "-company \"sunriax\" -repository \"argument\" -version \"1.0.0.0\" -directory \".\\\\\" -process 1234 "
+    }
+  }
+}

@@ -1,0 +1,26 @@
+LAMP Protocol
+----------------------------------------------------------------------------------
+
+Get configuration
+{
+    "Status": true/false
+    "Config": true/false
+    "Mode":
+    [
+        { "Level": "Info", "R": 0-255, "G": 0-255, "B": 0-255, "A": 0-31, "Time": 5 },
+        { "Level": "Warn", "R": 0-255, "G": 0-255, "B": 0-255, "A": 0-31, "Time": 20 },
+        { "Level": "Fail", "R": 0-255, "G": 0-255, "B": 0-255, "A": 0-31, "Time": 0 }
+    ],
+    "Switch": 0-15
+}
+
+{"Status":false,"Config":true,"Mode":[{"Level":0,"R":0,"G":255,"B":0,"A":16,"Time":5},{"Level":1,"R":255,"G":255,"B":0,"A":16,"Time":20},{"Level":2,"R":255,"G":0,"B":0,"A":16,"Time":0}], "Switch": 1}
+
+
+Set configuration
+[Info:%u,%u,%u,%u,%u]     ->  Parameter Red,Green,Blue,Alpha,Time
+[Warn:%u,%u,%u,%u,%u]     ->  Parameter Red,Green,Blue,Alpha,Time
+[Fail:%u,%u,%u,%u,%u]     ->  Parameter Red,Green,Blue,Alpha,Time
+
+[1,255,255,255,15,5]
+

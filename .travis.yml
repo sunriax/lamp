@@ -1,0 +1,60 @@
+# Travis CI build pipeline
+# --------------------------------------------
+language: c
+os: linux
+
+addons:
+  apt:
+    packages:
+      - binutils-avr
+      - avr-libc
+      - gcc-avr
+      - git
+
+install:
+  - |
+    git --version
+    avr-gcc --version
+    make --version
+  
+before_script:
+  - set -e
+  - |
+    avr-gcc -g -x c -O1 -mmcu=atmega8a -std=gnu99 -c ./firmware/main.c
+    avr-gcc -g -x c -O1 -mmcu=atmega8a -std=gnu99 -c ./firmware/adc/adc.c
+    avr-gcc -g -x c -O1 -mmcu=atmega8a -std=gnu99 -c ./firmware/led/led.c
+    avr-gcc -g -x c -O1 -mmcu=atmega8a -std=gnu99 -c ./firmware/prom/prom.c
+    avr-gcc -g -x c -O1 -mmcu=atmega8a -std=gnu99 -c ./firmware/sensor/sensor.c
+    avr-gcc -g -x c -O1 -mmcu=atmega8a -std=gnu99 -c ./firmware/spi/spi.c
+    avr-gcc -g -x c -O1 -mmcu=atmega8a -std=gnu99 -c ./firmware/system/system.c
+    avr-gcc -g -x c -O1 -mmcu=atmega8a -std=gnu99 -c ./firmware/uart/uart.c
+
+script:
+  - |
+    avr-gcc -g -mmcu=atmega8a -o firmware.elf main.o adc.o led.o prom.o sensor.o spi.o system.o uart.o
+    avr-objcopy -j .text -j .data -O ihex firmware.elf firmware.hex
+    avr-objcopy -j .eeprom --change-section-lma .eeprom=0 -O ihex firmware.elf firmware.eep
+
+before_deploy:
+  - |
+    if [ -n $TRAVIS_TAG ] && [[ $TRAVIS_TAG =~ ^v[0-9].[0-9]-[(F|f)]irmware$ ]]; then
+      travis_terminate 0
+    fi
+  - set -e
+  - git config --local user.name "0x007E"
+  - |
+    zip -r ./Firmware.zip ./firmware.hex ./firmware.eep
+    tar cfvz ./Firmware.tar.gz ./firmware.hex ./firmware.eep
+  - export TRAVIS_TAG="${TRAVIS_TAG}-Firmware"
+
+deploy:
+  provider: releases
+  overwrite: true
+  api_key: $GITHUB_TOKEN
+  file_glob: true
+  file:
+    - "./Firmware.zip"
+    - "./Firmware.tar.gz"
+  skip_cleanup: true
+  on:
+    tags: true

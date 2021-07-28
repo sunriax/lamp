@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>Update</AssemblyName>
+    <RootNamespace>RaGae.App.Lamp.Line</RootNamespace>
+    <ApplicationIcon>Icon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Octokit" Version="0.50.0" />
+    <PackageReference Include="RaGae.Argument" Version="1.0.5" />
+    <PackageReference Include="RaGae.Argument.IntegerMarshaler" Version="1.0.5" />
+    <PackageReference Include="RaGae.Argument.StringMarshaler" Version="1.0.5" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ApplicationFiles Include="$(TargetDir)\**" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Debug'">
+    <Copy SourceFiles="@(ApplicationFiles)" DestinationFolder="$(SolutionDir)\Forms\Update" SkipUnchangedFiles="false" />
+  </Target>
+</Project>

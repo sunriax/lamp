@@ -1,0 +1,67 @@
+name: Release Lamp Application
+
+on:
+  push:
+    tags-ignore:
+      - '**-firmware'
+env:
+  # Path to the solution file relative to the root of the project.
+  SOLUTION_DIRECTORY: lamp
+  SOLUTION_FILE_PATH: lamp\Lamp.sln
+  BUILD_CONFIGURATION: Release
+  OUTPUT_DIRECTORY: output
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install .NET Core SDK
+      uses: actions/setup-dotnet@v1.8.1
+      with:
+        dotnet-version: '5.0.302'
+    
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Restore NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:BaseOutputPath=${{env.GITHUB_WORKSPACE}}\${{env.OUTPUT_DIRECTORY}}\ ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Pack
+      run: |
+        mkdir ${{env.GITHUB_WORKSPACE}}\${{env.OUTPUT_DIRECTORY}}\${{env.SOLUTION_DIRECTORY}}
+        Copy-Item -Path ${{env.GITHUB_WORKSPACE}}\${{env.OUTPUT_DIRECTORY}}\Release\net5.0-windows\* -Destination ${{env.GITHUB_WORKSPACE}}\${{env.OUTPUT_DIRECTORY}}\${{env.SOLUTION_DIRECTORY}}\ -Recurse
+        mkdir ${{env.GITHUB_WORKSPACE}}\${{env.OUTPUT_DIRECTORY}}\${{env.SOLUTION_DIRECTORY}}\Update
+        Copy-Item -Path ${{env.GITHUB_WORKSPACE}}\${{env.OUTPUT_DIRECTORY}}\Release\net5.0\* -Destination ${{env.GITHUB_WORKSPACE}}\${{env.OUTPUT_DIRECTORY}}\${{env.SOLUTION_DIRECTORY}}\Update\ -Recurse
+        Get-ChildItem ${{env.GITHUB_WORKSPACE}}\${{env.OUTPUT_DIRECTORY}}\${{env.SOLUTION_DIRECTORY}} | Compress-Archive -DestinationPath ${{env.GITHUB_WORKSPACE}}\Lamp.zip
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{env.GITHUB_WORKSPACE}}\Lamp.zip
+        asset_name: Lamp.zip
+        asset_content_type: application/zip
+
